@@ -1,7 +1,7 @@
 # WebGL-thing
 A thing made with WebGL. Just to mess around with it and learn it.
 
-Some images that are not mine:
+Some images that are not mine (they got in with the initial commit):
 * Linkki Jyväskylä ry logo
 * Earth map by JHT's planetary pixel emporium
 * UV map form UV map wikipedia page
