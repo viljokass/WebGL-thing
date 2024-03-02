@@ -93,26 +93,27 @@ export class Cube extends SceneObject {
 
   // Use this method to draw. In goes the shader.
   draw(shader) {
-     let gl = shader.glContext;
-     gl.bindVertexArray(this.vao);
-     shader.use();
-     gl.uniformMatrix4fv(shader.modelLocation, true, this.model);
+    if (shader == null) return;
+    let gl = shader.glContext;
+    gl.bindVertexArray(this.vao);
+    shader.use();
+    gl.uniformMatrix4fv(shader.modelLocation, true, this.model);
 
-     gl.activeTexture(gl.TEXTURE0);
-     if (this.diffuseTexAttached) {
-       gl.bindTexture(gl.TEXTURE_2D, this.diffuseTex);
-     } else {
-       gl.bindTexture(gl.TEXTURE_2D, null);
-     }
+    gl.activeTexture(gl.TEXTURE0);
+    if (this.diffuseTexAttached) {
+      gl.bindTexture(gl.TEXTURE_2D, this.diffuseTex);
+    } else {
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
 
-     gl.activeTexture(gl.TEXTURE1);
-     if (this.specularTexAttached) {
-       gl.bindTexture(gl.TEXTURE_2D, this.specularTex);
-     } else {
-       gl.bindTexture(gl.TEXTURE_2D, null);
-     }
+    gl.activeTexture(gl.TEXTURE1);
+    if (this.specularTexAttached) {
+      gl.bindTexture(gl.TEXTURE_2D, this.specularTex);
+    } else {
+      gl.bindTexture(gl.TEXTURE_2D, null);
+    }
 
-     gl.drawArrays(gl.TRIANGLES, 0, 36);
+    gl.drawArrays(gl.TRIANGLES, 0, 36);
   }
 }
 

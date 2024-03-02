@@ -121,6 +121,7 @@ export class Sphere extends SceneObject {
 
 
   draw(shader) {
+    if (shader == null) return;
     let gl = shader.glContext;
     gl.bindVertexArray(this.vao);
     shader.use();

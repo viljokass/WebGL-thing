@@ -6,9 +6,9 @@ import {Cube} from './drawables/cube.js';
 import { Sphere } from './drawables/sphere.js';
 import * as Texture from './texture.js';
 
+// A hard coded scene
 export class Scene {
     constructor(glContext) {
-
         // TEXTURES
         // Load textures so that they can be attached to different objects
         let texPohja  = Texture.loadTexture(glContext, "./imgs/pohja.png");
@@ -16,21 +16,24 @@ export class Scene {
         let texKuutio = Texture.loadTexture(glContext, "./imgs/kuutio.png");
         let texAllSpec = Texture.loadTexture(glContext, "./imgs/allSpec.png");
         let texLattia = Texture.loadTexture(glContext, "./imgs/lattia.png");
+        let texBoard = Texture.loadTexture(glContext, "./imgs/board.png");
+        let texBoardSpec = Texture.loadTexture(glContext, "./imgs/board_specular.png");
 
         // DRAWABLES
-        // 1st child object of paddle
+        // 1st child object of paddle - the plate
         let plate = new Cube(glContext, 1);
         plate.attachDiffuseTex(texPohja);
         plate.attachSpecularTex(texPohja_specular);
         plate.setPositionObject(0, 0.5, 0);
-        plate.scaleObject(.7, 1, .1);
+        plate.scaleObject(.7, .7, .12);
         plate.yRotateObject(Math.PI/2);
+        plate.zRotateObject(Math.PI/4);
 
-        // 2nd child object of paddle
+        // 2nd child object of paddle - the stick
         let stick = new Cube(glContext, 1);
         stick.attachDiffuseTex(texKuutio);
         stick.attachSpecularTex(texAllSpec);
-        stick.setPositionObject(0, -.5, 0);
+        stick.setPositionObject(0, -.35, 0);
         stick.scaleObject(0.1, 1, 0.1);
 
         // PADDLE 1
@@ -40,7 +43,7 @@ export class Scene {
         paddle1.addChild(plate);
         paddle1.addChild(stick);
         paddle1.scaleObject(0.7,0.7,0.7);
-        paddle1.setPositionObject(-7, -0.5, 0);
+        paddle1.setPositionObject(-7, .4 , 0);
         this.paddle1 = paddle1;
 
         // PADDLE 2
@@ -49,8 +52,8 @@ export class Scene {
         // Add them pieces
         paddle2.addChild(plate);
         paddle2.addChild(stick);
-        paddle1.scaleObject(0.7,0.7,0.7);
-        paddle2.setPositionObject(7, -0.5, 0);
+        paddle2.scaleObject(0.7,0.7,0.7);
+        paddle2.setPositionObject(7, .4, 0);
         this.paddle2 = paddle2;
 
         // TABLE
@@ -59,14 +62,16 @@ export class Scene {
         tableRoot.setPositionObject(0, -0.1, 0);
         // Table plate 1
         let tablePlate1 = new Cube(glContext, 1);
-        tablePlate1.attachDiffuseTex(texPohja);
-        tablePlate1.attachSpecularTex(texPohja_specular);
+        tablePlate1.attachDiffuseTex(texBoard);
+        tablePlate1.attachSpecularTex(texBoardSpec);
+        tablePlate1.yRotateObject(Math.PI/2);
         tablePlate1.setPositionObject(-2, 0, 0);
         tablePlate1.scaleObject(4, 0.1, 4);
         // Table plate 2
         let tablePlate2 = new Cube(glContext, 1);
-        tablePlate2.attachDiffuseTex(texPohja);
-        tablePlate2.attachSpecularTex(texPohja_specular);
+        tablePlate2.attachDiffuseTex(texBoard);
+        tablePlate2.attachSpecularTex(texBoardSpec);
+        tablePlate2.yRotateObject(Math.PI/2);
         tablePlate2.setPositionObject(2, 0, 0);
         tablePlate2.scaleObject(4, 0.1, 4);
         // Middle bar
@@ -135,14 +140,39 @@ export class Scene {
         let light = new Sphere(glContext, 20, 0.05);
         light.attachDiffuseTex(texAllSpec);
         this.light = light;
+
+        this.cameraTarget = new Empty(glContext);
     }
 
-    // Put movement here
-    tick(time) {
-        let lightPos = lightPlaceFunction(time);
+    // 1st movement function
+    tick1(time) {
+
+        this.cameraTarget.setPositionObject(0, Math.max(8-time*4, 1), 0);
+
+        // Timescale of the movement
+        time *= 2;
+
+        // Move the light
+        let lightPos = lightPlaceFunctionAction(time);
         this.light.setPositionObject(lightPos[0], lightPos[1], lightPos[2]);
+
+        // Move the paddles
+        this.paddle1.setPositionObject(-7, .5, lightPos[2]);
+        this.paddle2.setPositionObject( 7, .5, lightPos[2]);
+
+        // Rotate the paddles
+        this.paddle1.zRotateObject(-paddleZRotationFunction(time + 2));
+        this.paddle2.zRotateObject(paddleZRotationFunction(time));
     }
 
+    // 2nd movement function haerregyyd
+    tick2(deltaTime) {
+        // Timescale
+        deltaTime *= 2;
+        this.light.moveObject(3 * deltaTime)
+    }
+
+    // In come the shaders
     draw(shaders) {
         let worldShader = shaders[0];
         let lightShader = shaders[1];
@@ -154,12 +184,43 @@ export class Scene {
     }
 }
 
-// This function is (hopefully) used to determine the light place a
-// a bit more realistically than some weird trigonometric functions.
-function lightPlaceFunction(time) {
+// This function is used to determine the light placement a bit
+// more realistically than some weird trigonometric functions.
+// Thanks to Lari and Alexander for helping me figure this one out.
+function lightPlaceFunctionAction(time) {
+    // Modify the timescale
     time += Math.PI/2;
-    let x = 6.9* Math.sin(time);
-    let y = Math.abs(Math.sin(2*time));
-    let z = Math.sin(time + Math.PI/2);
+    time /= 2;
+
+    // Define x movement
+    let exponent = 0.8;
+    let helpTime = time - Math.floor(time);
+    let x = (Math.floor(time) % 2 == 0) ? Math.pow(helpTime, exponent) : (1 - Math.pow(helpTime, exponent));
+    let xFactor = 6.8;
+    x *= 2 * xFactor;
+    x -= xFactor;
+
+    // Define y movement
+    let y = Math.abs(Math.sin(time*Math.PI + 1.2));
+    // if y = 0 => naps
+
+    // Define z movement
+    let zTime = time/5;
+    let zHelpTime = zTime - Math.floor(zTime);
+    let z = (Math.floor(zTime) % 2 == 0) ? zHelpTime : 1 - zHelpTime;
+    let zFactor = 1.4;
+    z *= 2 * zFactor;
+    z -= zFactor;
+
+    // Collect and return
     return [x,y,z];
   }
+
+// A function to determine the rotation of the paddles when striking
+// Probably should make this one so that the paddle strikes only on it's own turn
+function paddleZRotationFunction(time) {
+    time *= Math.PI/2;
+    time += Math.PI/7;
+    let rotation = Math.max(4 * Math.sin(time) - 3.5, -1);
+    return rotation;
+}

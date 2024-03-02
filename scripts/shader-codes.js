@@ -47,7 +47,7 @@ void main() {
   vec3 specTex = vec3(texture(texSpec, texCoords));
 
   float distance = length(lightPos - fragPos);
-  float attenuation = 1.0 / (1.0 + (0.05 * distance) + (0.015 * (distance * distance)));
+  float attenuation = 1.0 / (1.0 + (0.05 * distance) + (0.014 * (distance * distance)));
 
   // Ambient light
   vec3 ambient = ambientStrength * lightColor;
