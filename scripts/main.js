@@ -183,7 +183,7 @@ function main() {
     skene.draw([shader, lightShader]);
 
     // Call this function recursively
-    if (Vecmath.vec3length(lightPosition, viewPosition) < 0.4) {
+    if (Vecmath.vec3length(lightPosition, viewPosition) < 0.4 || time > switchTime + 15) {
       switchTime = time;
       // LIGHT
       // Set light color to each shader
@@ -236,7 +236,7 @@ function main() {
     skene.draw([shader, lightShader]);
 
     // Call this function recursively
-    if (time > switchTime + 7) {
+    if (time > switchTime + 9) {
       switchTime = time;
       // LIGHT
       // Set light color to each shader
@@ -293,7 +293,7 @@ function main() {
       switchTime = time;
       // LIGHT
       // Set light color to each shader
-      let lightColor = [.5, 0, 1];
+      let lightColor = [1, 1, 1];
       // To object shader
       let shaderLightColorLoc = shader.getUniformLocation("lightColor");
       glContext.uniform3fv(shaderLightColorLoc, lightColor);
@@ -310,14 +310,41 @@ function main() {
   // 5st rendre lopo
   function renderLoop5(time) {
 
-    // Time to seconds
+    // scale time from milliseconds to seconds
     time /= 1000;
 
     // Clear the background
     glContext.clear(glContext.COLOR_BUFFER_BIT);
 
-    if (time > switchTime + 4) {
-      loppu();
+    // Tick the scene forward
+    skene.tick1(time);
+
+    // Set the light position
+    lightPosition = skene.light.getPos();
+
+    // Set the camera parameters
+    camX = camrad * Math.sin(time/2);
+    camZ = camrad * Math.cos(time/2);
+    viewPosition = [camX, camrad/2, camZ];
+    viewMat = Vecmath.lookAt(viewPosition, [0, time-switchTime + 1, 0], [0, 1, 0]);
+
+    // Activate object shader to set the necessary uniform
+    shader.use()
+    glContext.uniformMatrix4fv(viewLoc, true, viewMat);
+    glContext.uniform3fv(viewPositionLoc, viewPosition);
+    glContext.uniform3fv(lightPositionLoc, lightPosition);
+
+    // Activate light shader to set the necessary uniforms
+    lightShader.use();
+    glContext.uniformMatrix4fv(lightViewLoc, true, viewMat);
+
+    // Draw the scene with this simple function :)
+    skene.draw([shader, lightShader]);
+
+    // Call this function recursively
+    if (time > switchTime + 8) {
+      switchTime = time;
+      window.requestAnimationFrame(loppu);
     } else {
       window.requestAnimationFrame(renderLoop5);
     }
@@ -325,10 +352,10 @@ function main() {
 
   // Loppu ja sillai
   function loppu() {
-    console.log("No klop was heard...");
+    // Clear the background
+    glContext.clear(glContext.COLOR_BUFFER_BIT);
   }
 }
-
 
 
 

@@ -19,6 +19,10 @@ export class Scene {
         let texBoard = Texture.loadTexture(glContext, "./imgs/board.png");
         let texBoardSpec = Texture.loadTexture(glContext, "./imgs/board_specular.png");
 
+        // AUDIO
+        this.tableNaks = new Audio("./audio/NaksS.wav");
+        this.paddlePoks = new Audio("./audio/PoksS.wav");
+
         // DRAWABLES
         // 1st child object of paddle - the plate
         let plate = new Cube(glContext, 1);
@@ -27,7 +31,6 @@ export class Scene {
         plate.setPositionObject(0, 0.5, 0);
         plate.scaleObject(.7, .7, .12);
         plate.yRotateObject(Math.PI/2);
-        plate.zRotateObject(Math.PI/4);
 
         // 2nd child object of paddle - the stick
         let stick = new Cube(glContext, 1);
@@ -153,7 +156,7 @@ export class Scene {
         time *= 2;
 
         // Move the light
-        let lightPos = lightPlaceFunctionAction(time);
+        let lightPos = lightPlaceFunctionAction(time, this.tableNaks, this.paddlePoks);
         this.light.setPositionObject(lightPos[0], lightPos[1], lightPos[2]);
 
         // Move the paddles
@@ -187,7 +190,8 @@ export class Scene {
 // This function is used to determine the light placement a bit
 // more realistically than some weird trigonometric functions.
 // Thanks to Lari and Alexander for helping me figure this one out.
-function lightPlaceFunctionAction(time) {
+// Also plays some sounds that come in.
+function lightPlaceFunctionAction(time, tableNaks, paddlePoks) {
     // Modify the timescale
     time += Math.PI/2;
     time /= 2;
@@ -195,6 +199,7 @@ function lightPlaceFunctionAction(time) {
     // Define x movement
     let exponent = 0.8;
     let helpTime = time - Math.floor(time);
+    if (helpTime < 0.05 || helpTime > 0.95) paddlePoks.play();
     let x = (Math.floor(time) % 2 == 0) ? Math.pow(helpTime, exponent) : (1 - Math.pow(helpTime, exponent));
     let xFactor = 6.8;
     x *= 2 * xFactor;
@@ -202,7 +207,7 @@ function lightPlaceFunctionAction(time) {
 
     // Define y movement
     let y = Math.abs(Math.sin(time*Math.PI + 1.2));
-    // if y = 0 => naps
+    if (y < 0.05) tableNaks.play();
 
     // Define z movement
     let zTime = time/5;
