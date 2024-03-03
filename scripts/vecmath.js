@@ -118,6 +118,12 @@ export function vec3subtract(a, b) {
   return [a[0] - b[0], a[1] - b[1], a[2] - b[2]];
 }
 
+export function vec3length(a, b) {
+  return Math.sqrt(Math.pow(a[0] - b[0], 2) + 
+                   Math.pow(a[1] - b[1], 2) + 
+                   Math.pow(a[2] - b[2], 2));
+}
+
 // Normalization of a 3D vector
 export function vec3normalize(a) {
   const a0 = a[0];
@@ -192,6 +198,4 @@ export function mat4copy(a) {
   a.map((x)=>out.push(x));
   return out;
 }
-
-
 

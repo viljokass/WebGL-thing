@@ -69,18 +69,6 @@ export class Sphere extends SceneObject {
     // Ending point
     vertex = generateSphereVertex(0, radius, 0);
     vertex.map((v)=>verts.push(v));
-    let vs = 0;
-    for (let i = 0; i < verts.length; i += 8) {
-      console.log("------ " + ++vs);
-      console.log("Vertices: " + verts[i + 0].toFixed(2), 
-                                 verts[i + 1].toFixed(2), 
-                                 verts[i + 2].toFixed(2));
-      console.log("Normals: " + verts[i + 3].toFixed(2), 
-                                verts[i + 4].toFixed(2), 
-                                verts[i + 5].toFixed(2));
-      console.log("UV-coords: " + verts[i + 6].toFixed(2), 
-                                  verts[i + 7].toFixed(2));
-    }
 
     // Copy the data to the buffer
     glContext.bufferData(glContext.ARRAY_BUFFER, 
@@ -133,6 +121,7 @@ export class Sphere extends SceneObject {
 
 
   draw(shader) {
+    if (shader == null) return;
     let gl = shader.glContext;
     gl.bindVertexArray(this.vao);
     shader.use();
