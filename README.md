@@ -1,6 +1,8 @@
 # WebGL-thing
 A thing made with WebGL. Just to mess around with it and learn it.
 
+It can be found deployed here: https://viljokass.github.io/WebGL_thing/
+
 ## About the thing
 
 The thing has at least the following things.
